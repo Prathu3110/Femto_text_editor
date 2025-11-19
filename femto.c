@@ -16,10 +16,12 @@ void enableraw(){
     atexit(disableraw);
 
     struct termios raw=orig_termios;
-    raw.c_iflag &= ~(ICRNL| IXON);
+    raw.c_iflag &= ~(BRKINT|INPCK|ISTRIP|ICRNL| IXON);
     raw.c_lflag &= ~(ECHO |ICANON | ISIG |IEXTEN) ; 
     raw.c_oflag &= ~(OPOST);
-    
+    raw.c_cflag |= ~(CS8);
+
+    //for c_cflag CS8 we use | instead of & because CS8 is a bit mask and not a flag
     //ICANON- is used for canonical mode (which means input is read line by line) 
     //ISIG is used for operations such INTEREPT SUSPEND TERMINATE (like ctrl-c, ctrl-z)
     //IXON here is used for ctrl-s and ctrl-q which pauses and unpauses
