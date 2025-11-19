@@ -18,6 +18,7 @@ void enableraw(){
     struct termios raw=orig_termios;
     raw.c_iflag &= ~(ICRNL| IXON);
     raw.c_lflag &= ~(ECHO |ICANON | ISIG |IEXTEN) ; 
+    raw.c_oflag &= ~(OPOST);
     
     //ICANON- is used for canonical mode (which means input is read line by line) 
     //ISIG is used for operations such INTEREPT SUSPEND TERMINATE (like ctrl-c, ctrl-z)
@@ -35,11 +36,11 @@ int main(){
     char c;
     while(read(STDIN_FILENO,&c,1)==1 && c!='q'); //quits when q is entered
     if(iscntrl(c)){
-        printf("%d \n", c);
-
+        printf("%d \r\n", c);
+// Since we are using OPOST , we need to use \r\n for next line escape sequence instead of just\n
     }
     else{
-        printf("%d ('%c')\n",c,c);
+        printf("%d ('%c')\r\n",c,c);
     }
     return 0;
 }
