@@ -3,16 +3,27 @@
 #include<unistd.h>
 #include<termios.h>
 #include<stdlib.h>
+#include<errno.h>
 
 struct termios orig_termios;
 
+void die(char *s){
+    perror(s);
+    exit(1);
+}
+
 void disableraw(){
-    tcsetattr(STDIN_FILENO,TCSAFLUSH, &orig_termios);
+    if (tcsetattr(STDIN_FILENO,TCSAFLUSH, &orig_termios)==-1 ){
+        die("tcsetattr");
+    }
+    
 }
 
 void enableraw(){
     
-    tcgetattr(STDIN_FILENO, &orig_termios);
+    if (tcgetattr(STDIN_FILENO, &orig_termios)==-1){
+        die("tgetattr");
+    }
     atexit(disableraw);
 
     struct termios raw=orig_termios;
@@ -30,7 +41,9 @@ void enableraw(){
     //IEXTEN is for ctrl-v , and when you press ctrl-v before the next chartacter is taken as literal input , but now its is disabled
     //ICRNL this here is used for disabling ctrl-m, stands for (CR- carriage return and NL= new line) this is used becasue ctrl-m inputs as 10 bytes while actually it should give 13 bytes
 
-    tcsetattr(STDIN_FILENO,TCSAFLUSH, &raw);
+    if (tcsetattr(STDIN_FILENO,TCSAFLUSH, &raw) ==-1){
+        die("tcsetattr");
+            }
 
 }
 
@@ -39,7 +52,9 @@ int main(){
     enableraw();
     while(1){
         char c ='\0';
-        read(STDIN_FILENO, &c , 1);
+        if(read(STDIN_FILENO, &c , 1)==-1 && errno!=EAGAIN){
+            die("read");
+        }
     
         if(iscntrl(c)){
             printf("%d \r\n", c);
