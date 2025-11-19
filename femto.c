@@ -20,6 +20,8 @@ void enableraw(){
     raw.c_lflag &= ~(ECHO |ICANON | ISIG |IEXTEN) ; 
     raw.c_oflag &= ~(OPOST);
     raw.c_cflag |= ~(CS8);
+    raw.c_cc[VMIN]=0;
+    raw.c_cc[VTIME]=1;
 
     //for c_cflag CS8 we use | instead of & because CS8 is a bit mask and not a flag
     //ICANON- is used for canonical mode (which means input is read line by line) 
@@ -35,14 +37,19 @@ void enableraw(){
 
 int main(){
     enableraw();
-    char c;
-    while(read(STDIN_FILENO,&c,1)==1 && c!='q'); //quits when q is entered
-    if(iscntrl(c)){
-        printf("%d \r\n", c);
-// Since we are using OPOST , we need to use \r\n for next line escape sequence instead of just\n
-    }
-    else{
-        printf("%d ('%c')\r\n",c,c);
+    while(1){
+        char c ='\0';
+        read(STDIN_FILENO, &c , 1);
+    
+        if(iscntrl(c)){
+            printf("%d \r\n", c);
+    // Since we are using OPOST , we need to use \r\n for next line escape sequence instead of just\n
+        }
+        else{
+            printf("%d ('%c')\r\n",c,c);
+        }
+        if(c=='q') break;
+        //quits when q is entered
     }
     return 0;
 }
