@@ -1,3 +1,4 @@
+/*** includes ***/
 #include<ctype.h>
 #include<stdio.h>
 #include<unistd.h>
@@ -5,8 +6,13 @@
 #include<stdlib.h>
 #include<errno.h>
 
+/*** defining ***/
+#define CTRL_KEY(k) ((k) & 0x1f)
+
+/*** data ***/
 struct termios orig_termios;
 
+/*** terminal ***/
 void die(char *s){
     perror(s);
     exit(1);
@@ -47,6 +53,7 @@ void enableraw(){
 
 }
 
+/*** init ***/
 
 int main(){
     enableraw();
@@ -63,8 +70,8 @@ int main(){
         else{
             printf("%d ('%c')\r\n",c,c);
         }
-        if(c=='q') break;
-        //quits when q is entered
+        if(c==CTRL_KEY('q')) break;
+        //quits when ctrl-q is entered
     }
     return 0;
 }
