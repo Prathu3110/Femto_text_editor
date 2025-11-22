@@ -53,7 +53,7 @@ void enableraw(){
 
 }
 
-char editorReadkey(){
+char editor_readkey(){
     int nread;
     char c;
     // Since we are using OPOST , we need to use \r\n for next line escape sequence instead of just\n
@@ -64,8 +64,8 @@ char editorReadkey(){
 }
 
 /*** input ***/
-void editorProcessKeypress(){
-    char c = editorReadkey();
+void editor_process_keypress(){
+    char c = editor_readkey();
     //quits when ctrl-q is entered
     switch (c) {
         case CTRL_KEY('q'):
@@ -74,6 +74,11 @@ void editorProcessKeypress(){
     }
 }
 
+/*** output ***/
+
+void editor_screen_refresh(){
+    write(STDOUT_FILENO,"\x1b[2J",4);
+}// this function basically clears the screen by using the escape sequence and writing into 4 bytes
 
 /*** init ***/
 
@@ -81,7 +86,8 @@ int main(){
     enableraw();
     
     while (1) {
-    editorProcessKeypress();
+    editor_process_keypress();
+    editor_screen_refresh();
     }
         
     return 0;
