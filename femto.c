@@ -14,6 +14,8 @@ struct termios orig_termios;
 
 /*** terminal ***/
 void die(char *s){
+    write(STDOUT_FILENO,"\x1b[2J",4);
+    write(STDOUT_FILENO,"\x1b[H",3);
     perror(s);
     exit(1);
 }
@@ -69,6 +71,8 @@ void editor_process_keypress(){
     //quits when ctrl-q is entered
     switch (c) {
         case CTRL_KEY('q'):
+        write(STDOUT_FILENO,"\x1b[2J",4);
+        write(STDOUT_FILENO,"\x1b[H",3);
         exit(0);
         break;
     }
@@ -84,7 +88,7 @@ void editor_screen_refresh(){
     write(STDOUT_FILENO,"\x1b[H",3);
     //this reposistions the cursor using the H command
 
-    
+
 }
 
 
