@@ -49,29 +49,40 @@ void enableraw(){
 
     if (tcsetattr(STDIN_FILENO,TCSAFLUSH, &raw) ==-1){
         die("tcsetattr");
-            }
+    }
 
 }
+
+char editorReadkey(){
+    int nread;
+    char c;
+    // Since we are using OPOST , we need to use \r\n for next line escape sequence instead of just\n
+    while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
+        if (nread == -1 && errno != EAGAIN) die("read");
+    }
+    return c;
+}
+
+/*** input ***/
+void editorProcessKeypress(){
+    char c = editorReadkey();
+    //quits when ctrl-q is entered
+    switch (c) {
+        case CTRL_KEY('q'):
+        exit(0);
+        break;
+    }
+}
+
 
 /*** init ***/
 
 int main(){
     enableraw();
-    while(1){
-        char c ='\0';
-        if(read(STDIN_FILENO, &c , 1)==-1 && errno!=EAGAIN){
-            die("read");
-        }
     
-        if(iscntrl(c)){
-            printf("%d \r\n", c);
-    // Since we are using OPOST , we need to use \r\n for next line escape sequence instead of just\n
-        }
-        else{
-            printf("%d ('%c')\r\n",c,c);
-        }
-        if(c==CTRL_KEY('q')) break;
-        //quits when ctrl-q is entered
+    while (1) {
+    editorProcessKeypress();
     }
+        
     return 0;
 }
