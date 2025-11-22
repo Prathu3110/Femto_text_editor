@@ -78,7 +78,15 @@ void editor_process_keypress(){
 
 void editor_screen_refresh(){
     write(STDOUT_FILENO,"\x1b[2J",4);
-}// this function basically clears the screen by using the escape sequence and writing into 4 bytes
+    //uses J command
+    // this function basically clears the screen by using the escape sequence and writing into 4 bytes
+
+    write(STDOUT_FILENO,"\x1b[H",3);
+    //this reposistions the cursor using the H command
+
+    
+}
+
 
 /*** init ***/
 
