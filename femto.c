@@ -10,7 +10,11 @@
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 /*** data ***/
-struct termios orig_termios;
+struct editor_config{
+    struct termios orig_termios;
+};
+struct editor_config E;
+
 
 /*** terminal ***/
 void die(char *s){
@@ -21,7 +25,7 @@ void die(char *s){
 }
 
 void disableraw(){
-    if (tcsetattr(STDIN_FILENO,TCSAFLUSH, &orig_termios)==-1 ){
+    if (tcsetattr(STDIN_FILENO,TCSAFLUSH, &E.orig_termios)==-1 ){
         die("tcsetattr");
     }
     
@@ -29,12 +33,12 @@ void disableraw(){
 
 void enableraw(){
     
-    if (tcgetattr(STDIN_FILENO, &orig_termios)==-1){
+    if (tcgetattr(STDIN_FILENO, &E.orig_termios)==-1){
         die("tgetattr");
     }
     atexit(disableraw);
 
-    struct termios raw=orig_termios;
+    struct termios raw=E.orig_termios;
     raw.c_iflag &= ~(BRKINT|INPCK|ISTRIP|ICRNL| IXON);
     raw.c_lflag &= ~(ECHO |ICANON | ISIG |IEXTEN) ; 
     raw.c_oflag &= ~(OPOST);
