@@ -13,13 +13,15 @@
 /*** data ***/
 //to make it global state
 struct editor_config{
+    int screenrows;
+    int screencols;
     struct termios orig_termios;
 };
 struct editor_config E;
 
 
 /*** terminal ***/
-void die(char *s){
+void die(const char *s){
     write(STDOUT_FILENO,"\x1b[2J",4);
     write(STDOUT_FILENO,"\x1b[H",3);
     perror(s);
@@ -36,7 +38,7 @@ void disableraw(){
 void enableraw(){
     
     if (tcgetattr(STDIN_FILENO, &E.orig_termios)==-1){
-        die("tgetattr");
+        die("tcgetattr");
     }
     atexit(disableraw);
 
@@ -44,7 +46,7 @@ void enableraw(){
     raw.c_iflag &= ~(BRKINT|INPCK|ISTRIP|ICRNL| IXON);
     raw.c_lflag &= ~(ECHO |ICANON | ISIG |IEXTEN) ; 
     raw.c_oflag &= ~(OPOST);
-    raw.c_cflag |= ~(CS8);
+    raw.c_cflag |= (CS8);
     raw.c_cc[VMIN]=0;
     raw.c_cc[VTIME]=1;
 
@@ -102,7 +104,7 @@ int get_window_size(int *rows, int *cols){
 /*** output ***/
 
 void draw_tildes(){
-    for (int y=0;y<24;y++){
+    for (int y=0;y<E.screenrows;y++){
         write(STDOUT_FILENO,"~\r\n",3);
     }
 
@@ -128,9 +130,14 @@ void editor_screen_refresh(){
 
 /*** init ***/
 
+void init_editor(){
+    if(get_window_size(&E.screenrows, &E.screencols)==-1){
+        die("get_window_size");
+    }
+}
 int main(){
     enableraw();
-    
+    init_editor();
     while (1) {
     editor_process_keypress();
     editor_screen_refresh();
