@@ -90,6 +90,8 @@ void editor_process_keypress(){
 int get_window_size(int *rows, int *cols){
     struct winsize ws;
     if(ioctl(STDOUT_FILENO,TIOCGWINSZ, &ws)==-1 | ws.ws_col==0){
+        if(write(STDOUT_FILENO,"\x1b[999C\x1b[999B",12) !=12) return -1;// this does same as getting windows size like ioct, but this is used when ioct does not work
+        editor_readkey();
         return -1;
     }
     else{
