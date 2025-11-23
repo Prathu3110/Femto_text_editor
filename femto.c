@@ -5,11 +5,13 @@
 #include<termios.h>
 #include<stdlib.h>
 #include<errno.h>
+#include<sys/ioctl.h>
 
 /*** defining ***/
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 /*** data ***/
+//to make it global state
 struct editor_config{
     struct termios orig_termios;
 };
@@ -80,6 +82,21 @@ void editor_process_keypress(){
         exit(0);
         break;
     }
+}
+
+//to get the window size of terminal
+int get_window_size(int *rows, int *cols){
+    struct winsize ws;
+    if(ioctl(STDOUT_FILENO,TIOCGWINSZ, &ws)==-1 | ws.ws_col==0){
+        return -1;
+    }
+    else{
+        *rows=ws.ws_row;
+        *cols=ws.ws_col;
+        return 0;
+
+    }
+
 }
 
 /*** output ***/
