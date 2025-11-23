@@ -70,7 +70,7 @@ void editor_process_keypress(){
     char c = editor_readkey();
     //quits when ctrl-q is entered
     switch (c) {
-        case CTRL_KEY('q'):
+        case CTRL_KEY('a'):// for now using ctrl-a , will change by final
         write(STDOUT_FILENO,"\x1b[2J",4);
         write(STDOUT_FILENO,"\x1b[H",3);
         exit(0);
@@ -80,6 +80,13 @@ void editor_process_keypress(){
 
 /*** output ***/
 
+void draw_tildes(){
+    for (int y=0;y<24;y++){
+        write(STDOUT_FILENO,"~\r\n",3);
+    }
+
+}
+
 void editor_screen_refresh(){
     write(STDOUT_FILENO,"\x1b[2J",4);
     //uses J command
@@ -88,8 +95,14 @@ void editor_screen_refresh(){
     write(STDOUT_FILENO,"\x1b[H",3);
     //this reposistions the cursor using the H command
 
+    //drawing the tildes
+    draw_tildes();
+    write(STDOUT_FILENO,"\x1b[H",3);
+
+
 
 }
+
 
 
 /*** init ***/
