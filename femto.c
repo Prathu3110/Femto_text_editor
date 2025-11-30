@@ -6,6 +6,7 @@
 #include<stdlib.h>
 #include<errno.h>
 #include<sys/ioctl.h>
+#include<string.h>
 
 /*** defining ***/
 #define CTRL_KEY(k) ((k) & 0x1f)
@@ -122,34 +123,66 @@ int get_window_size(int *rows, int *cols){
 
 }
 
+/*** Append buffer ***/
+//This is so that every time we refresh we dont need to use write() a lot of times
+
+struct abuf{
+    char *b;
+    int len;
+};
+#define ABUF_INT {NULL,0}
+
+void abAppend(struct abuf *ab, const char *s, int len){
+    char *new=realloc(ab->b,ab->len+len);
+
+    if(new==NULL) return;
+    memcpy(&new[ab->len],s,len);
+    ab->b =new;
+    ab->len +=len;
+
+}
+
+void abFree(struct abuf *ab){
+    free(ab->b);
+}
+
+
+
 /*** output ***/
 
-void draw_tildes(){
+void draw_tildes(struct abuf *ab){
     for (int y=0;y<E.screenrows;y++){
-        write(STDOUT_FILENO,"~",1);
-        if(y>E.screenrows-1){
-            write(STDOUT_FILENO,"\r\n",2);
-            
+        abAppend(ab,"~",1);
+        if(y<E.screenrows-1){
+            abAppend(ab,"\r\n",2);
+
         }
     }
 
 }
 
 void editor_screen_refresh(){
-    write(STDOUT_FILENO,"\x1b[2J",4);
+    struct abuf ab = ABUF_INT;
+
+    abAppend(&ab,"\x1b[2J",4);
     //uses J command
     // this function basically clears the screen by using the escape sequence and writing into 4 bytes
 
-    write(STDOUT_FILENO,"\x1b[H",3);
+    abAppend(&ab,"\x1b[H",3);
     //this reposistions the cursor using the H command
 
     //drawing the tildes
-    draw_tildes();
-    write(STDOUT_FILENO,"\x1b[H",3);
+    draw_tildes(&ab);
+    abAppend(&ab,"\x1b[H",3);
+
+    write(STDOUT_FILENO,ab.b,ab.len);
+    free(&ab);
+    
 
 
 
 }
+
 
 
 
