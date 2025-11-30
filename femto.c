@@ -74,20 +74,22 @@ char editor_readkey(){
 }
 
 int get_cursor_pos(int *rows,int *cols){
+
+    char buf[32];
+    unsigned int i =0;
+
     if(write(STDOUT_FILENO,"\x1b[6n",4) !=4) return -1;
-    print("\r\n");
-    char c;
-    while (read(STDIN_FILENO,&c,1)==1){
-        if(iscntrl(c)){
-            printf("%d\r\n", c);
-        }
-        else {
-            printf("%d ('%c')\r\n", c, c);
-        }
+
+    while (i < sizeof(buf) - 1) {
+        if (read(STDIN_FILENO, &buf[i], 1) != 1) break;
+        if (buf[i] == 'R') break;
+        i++;
     }
+    buf[i] = '\0';
+    printf("\r\n&buf[1]: '%s'\r\n", &buf[1]);
     editor_readkey();
     return -1;
-    
+
 }
 
 /*** input ***/
@@ -106,9 +108,9 @@ void editor_process_keypress(){
 //to get the window size of terminal
 int get_window_size(int *rows, int *cols){
     struct winsize ws;
-    if(ioctl(STDOUT_FILENO,TIOCGWINSZ, &ws)==-1 | ws.ws_col==0){
+    if(ioctl(STDOUT_FILENO,TIOCGWINSZ, &ws)==-1 || ws.ws_col==0){
         if(write(STDOUT_FILENO,"\x1b[999C\x1b[999B",12) !=12) return -1;// this does same as getting windows size like ioct, but this is used when ioct does not work
-        editor_readkey();
+        return get_cursor_pos(rows,cols);
         return -1;
     }
     else{
@@ -124,7 +126,11 @@ int get_window_size(int *rows, int *cols){
 
 void draw_tildes(){
     for (int y=0;y<E.screenrows;y++){
-        write(STDOUT_FILENO,"~\r\n",3);
+        write(STDOUT_FILENO,"~",1);
+        if(y>E.screenrows-1){
+            write(STDOUT_FILENO,"\r\n",2);
+            
+        }
     }
 
 }
