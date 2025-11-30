@@ -177,7 +177,7 @@ void editor_screen_refresh(){
     abAppend(&ab,"\x1b[H",3);
 
     write(STDOUT_FILENO,ab.b,ab.len);
-    free(&ab);
+    abFree(&ab);
 
 
 
