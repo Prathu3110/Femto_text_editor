@@ -85,6 +85,9 @@ int get_cursor_pos(int *rows,int *cols){
             printf("%d ('%c')\r\n", c, c);
         }
     }
+    editor_readkey();
+    return -1;
+    
 }
 
 /*** input ***/
