@@ -73,6 +73,20 @@ char editor_readkey(){
     return c;
 }
 
+int get_cursor_pos(int *rows,int *cols){
+    if(write(STDOUT_FILENO,"\x1b[6n",4) !=4) return -1;
+    print("\r\n");
+    char c;
+    while (read(STDIN_FILENO,&c,1)==1){
+        if(iscntrl(c)){
+            printf("%d\r\n", c);
+        }
+        else {
+            printf("%d ('%c')\r\n", c, c);
+        }
+    }
+}
+
 /*** input ***/
 void editor_process_keypress(){
     char c = editor_readkey();
